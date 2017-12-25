@@ -69,9 +69,9 @@ def load_data(data_dir, max_doc_length=10, max_sent_length=50):
     for fname in ('train', 'valid', 'test'):
         print('reading', fname)
         pname = os.path.join(data_dir, fname)
-        for dname in os.listdir(pname):  
+        for dname in os.listdir(pname):
 
-            with codecs.open(os.path.join(pname, dname), 'r', 'utf-8') as f:
+            with open(os.path.join(pname, dname), 'r', encoding='utf-8') as f:
                 lines = f.read().split('\n\n')
                 word_doc = []
                 label_doc = []
@@ -81,7 +81,7 @@ def load_data(data_dir, max_doc_length=10, max_sent_length=50):
                     line = line.replace('}', '').replace('{', '').replace('|', '')
                     line = line.replace('<unk>', ' | ')
 
-                    sent, label = line.split('\t\t\t')  
+                    sent, label = line.split('\t\t\t')
                     label_doc.append(label)
                     sent = sent.split(' ')
 
@@ -90,7 +90,7 @@ def load_data(data_dir, max_doc_length=10, max_sent_length=50):
 
                     word_array = [word_vocab.feed(c) for c in ['{'] + sent + ['}']]
                     word_doc.append(word_array)
-  
+
                 if len(word_doc) > max_doc_length:
                     word_doc = word_doc[:max_doc_length]
                     label_doc = label_doc[:max_doc_length]
@@ -115,7 +115,7 @@ def load_data(data_dir, max_doc_length=10, max_sent_length=50):
     for fname in ('train', 'valid', 'test'):
         word_tensors[fname] = np.zeros([len(word_tokens[fname]), actual_max_doc_length, max_sent_length], dtype=np.int32)
         label_tensors[fname] = np.zeros([len(labels[fname]), actual_max_doc_length], dtype=np.int32)
- 
+
         for i, word_doc in enumerate(word_tokens[fname]):
             for j, word_array in enumerate(word_doc):
                 word_tensors[fname][i][j][0:len(word_array)] = word_array
@@ -188,9 +188,9 @@ def load_data_abs(data_dir, max_doc_length=10, max_sent_length=50, max_output_le
     for fname in ('train', 'valid', 'test'):
         print('reading', fname)
         pname = os.path.join(data_dir, fname)
-        for dname in os.listdir(pname):  
+        for dname in os.listdir(pname):
 
-            with codecs.open(os.path.join(pname, dname), 'r', 'utf-8') as f:
+            with open(os.path.join(pname, dname), 'r', encoding='utf-8') as f:
                 lines = f.read().split('\n\n')
                 word_doc = []
                 ext_doc = []
@@ -200,7 +200,7 @@ def load_data_abs(data_dir, max_doc_length=10, max_sent_length=50, max_output_le
                     line = line.replace('}', '').replace('{', '').replace('|', '')
                     line = line.replace('<unk>', ' | ')
 
-                    sent, label = line.split('\t\t\t')  
+                    sent, label = line.split('\t\t\t')
                     sent = sent.split(' ')
 
                     if len(sent) > max_sent_length - 2:  # space for 'start' and 'end' words
@@ -209,10 +209,10 @@ def load_data_abs(data_dir, max_doc_length=10, max_sent_length=50, max_output_le
                     word_array = [word_vocab.feed(c) for c in ['{'] + sent + ['}']]
 
                     word_doc.append(word_array)
-                 
+
                     if label == '1':
                         ext_doc.extend(word_array[1:-1])
- 
+
                     if len(word_doc) == max_doc_length:
                         break
 
@@ -225,7 +225,7 @@ def load_data_abs(data_dir, max_doc_length=10, max_sent_length=50, max_output_le
 
                 ext_doc = [word_vocab['{']] + ext_doc + [word_vocab['}']]
                 ext_output[fname].append(ext_doc)
-     
+
                 actual_max_ext_length = max(actual_max_ext_length, len(ext_doc))
 
                 abs_doc = lines[2].replace('\n', ' ')
@@ -233,9 +233,9 @@ def load_data_abs(data_dir, max_doc_length=10, max_sent_length=50, max_output_le
                 if len(abs_doc) > max_output_length - 2:
                     abs_doc = abs_doc[:max_output_length-2]
 
-                abs_doc = [abs_vocab.feed(c) for c in ['{'] + abs_doc + ['}']]       
+                abs_doc = [abs_vocab.feed(c) for c in ['{'] + abs_doc + ['}']]
                 abs_output[fname].append(abs_doc)
- 
+
                 actual_max_abs_length = max(actual_max_abs_length, len(abs_doc))
 
     assert actual_max_doc_length <= max_doc_length
@@ -260,7 +260,7 @@ def load_data_abs(data_dir, max_doc_length=10, max_sent_length=50, max_output_le
     for fname in ('train', 'valid', 'test'):
         word_tensors[fname] = np.zeros([len(word_tokens[fname]), actual_max_doc_length, max_sent_length], dtype=np.int32)
         target_tensors[fname] = np.zeros([len(ext_output[fname]), max_output_length], dtype=np.int32)
- 
+
         for i, word_doc in enumerate(word_tokens[fname]):
             for j, word_array in enumerate(word_doc):
                 word_tensors[fname][i][j][0:len(word_array)] = word_array

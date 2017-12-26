@@ -2,13 +2,11 @@ from __future__ import print_function
 from __future__ import division
 
 import os
-import codecs
 import collections
 import numpy as np
 
 
 class Vocab:
-
     def __init__(self, token2index=None, index2token=None):
         self._token2index = token2index or {}
         self._index2token = index2token or []
@@ -55,7 +53,6 @@ class Vocab:
 
 
 def load_data(data_dir, max_doc_length=10, max_sent_length=50):
-
     word_vocab = Vocab()
     word_vocab.feed(' ')
     word_vocab.feed('{')
@@ -71,7 +68,7 @@ def load_data(data_dir, max_doc_length=10, max_sent_length=50):
         pname = os.path.join(data_dir, fname)
         for dname in os.listdir(pname):
 
-            with open(os.path.join(pname, dname), 'r', encoding='utf-8') as f:
+            with open(os.path.join(pname, dname), 'r', encoding='utf-8', errors='ignore') as f:
                 lines = f.read().split('\n\n')
                 word_doc = []
                 label_doc = []
@@ -86,7 +83,7 @@ def load_data(data_dir, max_doc_length=10, max_sent_length=50):
                     sent = sent.split(' ')
 
                     if len(sent) > max_sent_length - 2:  # space for 'start' and 'end' words
-                        sent = sent[:max_sent_length-2]
+                        sent = sent[:max_sent_length - 2]
 
                     word_array = [word_vocab.feed(c) for c in ['{'] + sent + ['}']]
                     word_doc.append(word_array)
@@ -113,7 +110,8 @@ def load_data(data_dir, max_doc_length=10, max_sent_length=50):
     word_tensors = {}
     label_tensors = {}
     for fname in ('train', 'valid', 'test'):
-        word_tensors[fname] = np.zeros([len(word_tokens[fname]), actual_max_doc_length, max_sent_length], dtype=np.int32)
+        word_tensors[fname] = np.zeros([len(word_tokens[fname]), actual_max_doc_length, max_sent_length],
+                                       dtype=np.int32)
         label_tensors[fname] = np.zeros([len(labels[fname]), actual_max_doc_length], dtype=np.int32)
 
         for i, word_doc in enumerate(word_tokens[fname]):
@@ -127,9 +125,7 @@ def load_data(data_dir, max_doc_length=10, max_sent_length=50):
 
 
 class DataReader:
-
     def __init__(self, word_tensor, label_tensor, batch_size):
-
         length = word_tensor.shape[0]
 
         doc_length = word_tensor.shape[1]
@@ -155,7 +151,6 @@ class DataReader:
         self.max_sent_length = sent_length
 
     def iter(self):
-
         for x, y in zip(self._x_batches, self._y_batches):
             yield x, y
 
@@ -190,7 +185,7 @@ def load_data_abs(data_dir, max_doc_length=10, max_sent_length=50, max_output_le
         pname = os.path.join(data_dir, fname)
         for dname in os.listdir(pname):
 
-            with open(os.path.join(pname, dname), 'r', encoding='utf-8') as f:
+            with open(os.path.join(pname, dname), 'r', encoding='utf-8', errors='ignore') as f:
                 lines = f.read().split('\n\n')
                 word_doc = []
                 ext_doc = []
@@ -204,7 +199,7 @@ def load_data_abs(data_dir, max_doc_length=10, max_sent_length=50, max_output_le
                     sent = sent.split(' ')
 
                     if len(sent) > max_sent_length - 2:  # space for 'start' and 'end' words
-                        sent = sent[:max_sent_length-2]
+                        sent = sent[:max_sent_length - 2]
 
                     word_array = [word_vocab.feed(c) for c in ['{'] + sent + ['}']]
 
@@ -221,7 +216,7 @@ def load_data_abs(data_dir, max_doc_length=10, max_sent_length=50, max_output_le
                 word_tokens[fname].append(word_doc)
 
                 if len(ext_doc) > max_output_length - 2:
-                    ext_doc = ext_doc[:max_output_length-2]
+                    ext_doc = ext_doc[:max_output_length - 2]
 
                 ext_doc = [word_vocab['{']] + ext_doc + [word_vocab['}']]
                 ext_output[fname].append(ext_doc)
@@ -231,7 +226,7 @@ def load_data_abs(data_dir, max_doc_length=10, max_sent_length=50, max_output_le
                 abs_doc = lines[2].replace('\n', ' ')
                 abs_doc = abs_doc.split(' ')
                 if len(abs_doc) > max_output_length - 2:
-                    abs_doc = abs_doc[:max_output_length-2]
+                    abs_doc = abs_doc[:max_output_length - 2]
 
                 abs_doc = [abs_vocab.feed(c) for c in ['{'] + abs_doc + ['}']]
                 abs_output[fname].append(abs_doc)
@@ -258,7 +253,8 @@ def load_data_abs(data_dir, max_doc_length=10, max_sent_length=50, max_output_le
         actual_max_target_length = actual_max_abs_length
 
     for fname in ('train', 'valid', 'test'):
-        word_tensors[fname] = np.zeros([len(word_tokens[fname]), actual_max_doc_length, max_sent_length], dtype=np.int32)
+        word_tensors[fname] = np.zeros([len(word_tokens[fname]), actual_max_doc_length, max_sent_length],
+                                       dtype=np.int32)
         target_tensors[fname] = np.zeros([len(ext_output[fname]), max_output_length], dtype=np.int32)
 
         for i, word_doc in enumerate(word_tokens[fname]):
@@ -276,9 +272,7 @@ def load_data_abs(data_dir, max_doc_length=10, max_sent_length=50, max_output_le
 
 
 class DataReader_abs:
-
     def __init__(self, word_tensor, target_tensor, batch_size):
-
         length = word_tensor.shape[0]
 
         doc_length = word_tensor.shape[1]
@@ -305,10 +299,8 @@ class DataReader_abs:
         self.max_sent_length = sent_length
 
     def iter(self):
-
         for x, y in zip(self._x_batches, self._y_batches):
             yield x, y
-
 
 
 if __name__ == '__main__':
@@ -318,17 +310,15 @@ if __name__ == '__main__':
     count = 0
     for x, y in DataReader(word_tensors['valid'], label_tensors['valid'], 6).iter():
         count += 1
-        print (x.shape, y.shape)
+        print(x.shape, y.shape)
         if count > 0:
             break
 
-    vocab, word_tensors, max_length, target_vocab, target_tensors, max_length_target = load_data_abs('data/demo', 5, 50, 150, use_abs=False)
+    vocab, word_tensors, max_length, target_vocab, target_tensors, max_length_target = load_data_abs('data/demo', 5, 50,
+                                                                                                     150, use_abs=False)
     count = 0
     for x, y in DataReader_abs(word_tensors['valid'], target_tensors['valid'], 6).iter():
         count += 1
-        print (x.shape, y.shape, max_length_target)
+        print(x.shape, y.shape, max_length_target)
         if count > 0:
             break
-
-
-
